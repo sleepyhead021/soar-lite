@@ -28,6 +28,7 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
 from contracts import Alert, AlertType, SyncMessage, SyncMessageType  # noqa: E402
 from serialization import to_json, sync_message_from_dict, alert_from_dict  # noqa: E402
+from sync_logger import log_sync  # noqa: E402
 
 from peer_discovery import PeerDiscovery  # noqa: E402
 
@@ -70,6 +71,7 @@ class AlertSharer:
         print(f"[{self.device_id}] Sharing alert {alert.alert_id} "
               f"({alert.alert_type.value}) with known peers: {peers}")
         self._sock.sendto(to_json(msg).encode("utf-8"), ("<broadcast>", ALERT_PORT))
+        log_sync("SEND", "new_alert", "broadcast")
 
     def _listen(self):
         while self._running:
@@ -90,6 +92,7 @@ class AlertSharer:
             if msg.message_id in self._seen_alert_ids:
                 continue  # avoid double-processing
             self._seen_alert_ids.add(msg.message_id)
+            log_sync("RECV", "new_alert", msg.sender_device_id)
 
             alert = alert_from_dict(msg.payload)
             self.on_alert_received(alert, from_peer=msg.sender_device_id)

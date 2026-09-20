@@ -28,11 +28,13 @@ from shared.contracts import Alert, AlertType, ActionType, Decision
 # already defined in AlertType (traffic_spike, sensor_anomaly, etc.)
 # ---------------------------------------------------------------------------
 FEATURE_KEYS = [
-    "connections_per_min",   # traffic_spike signal
-    "sensor_deviation",      # sensor_anomaly signal
-    "checksum_mismatch",     # data_tampering signal
-    "value_plausibility",    # false_data_injection signal (lower = less plausible)
+    "connections_per_min",
+    "power_draw_watts",
+    "power_draw_anomaly_score",
 ]
+# NOTE: smart-plug-only schema. Other device adapters (camera, thermostat,
+# lock) will likely add their own keys — confirm with Member 3 whether
+# FEATURE_KEYS should be unified or per-device-type before relying on this.
 
 ALERT_TYPES = list(AlertType)          # fixed order for one-hot encoding
 ACTIONS = list(ActionType)             # fixed order: index <-> ActionType

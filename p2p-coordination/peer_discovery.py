@@ -26,6 +26,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
 from contracts import SyncMessage, SyncMessageType  # noqa: E402
+from sync_logger import log_sync  # noqa: E402
 
 
 BROADCAST_PORT = 50000
@@ -80,6 +81,7 @@ class PeerDiscovery:
                 }
             ).encode("utf-8")
             self._sock.sendto(data, ("<broadcast>", BROADCAST_PORT))
+            log_sync("SEND", "heartbeat", "broadcast")
             time.sleep(HEARTBEAT_INTERVAL_SECONDS)
 
     def _listen(self):
@@ -95,6 +97,7 @@ class PeerDiscovery:
 
             sender = parsed.get("sender_device_id")
             if sender and sender != self.device_id:
+                log_sync("RECV", "heartbeat", sender)
                 with self._lock:
                     is_new = sender not in self.known_peers
                     self.known_peers[sender] = datetime.utcnow()

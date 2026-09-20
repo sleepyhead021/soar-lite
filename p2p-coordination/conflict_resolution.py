@@ -42,6 +42,7 @@ from typing import Dict, Tuple
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
 from contracts import Alert, SyncMessage, SyncMessageType  # noqa: E402
 from serialization import to_json, sync_message_from_dict  # noqa: E402
+from sync_logger import log_sync  # noqa: E402
 
 from peer_discovery import PeerDiscovery  # noqa: E402
 from alert_sharing import AlertSharer, _make_demo_alert  # noqa: E402
@@ -128,6 +129,7 @@ class ConflictResolver:
             timestamp=datetime.utcnow().isoformat(),
         )
         self._sock.sendto(to_json(msg).encode("utf-8"), ("<broadcast>", VOTE_PORT))
+        log_sync("SEND", "vote", "broadcast")
 
     def _listen(self):
         while self._running:
@@ -146,6 +148,7 @@ class ConflictResolver:
             if msg.message_type != SyncMessageType.VOTE:
                 continue
 
+            log_sync("RECV", "vote", msg.sender_device_id)
             alert_id = msg.payload["alert_id"]
             confidence = msg.payload["confidence"]
             agrees = msg.payload["agrees"]
