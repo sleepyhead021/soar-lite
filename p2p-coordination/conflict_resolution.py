@@ -66,12 +66,14 @@ def compute_tally(votes: Dict[str, Tuple[float, bool]]) -> Tuple[str, float, int
 
 
 class ConflictResolver:
-    def __init__(self, device_id: str, discovery: PeerDiscovery):
+    def __init__(self, device_id: str, discovery: PeerDiscovery, on_result=None):
         self.device_id = device_id
         self.discovery = discovery
         self._votes: Dict[str, Dict[str, Tuple[float, bool]]] = {}
+        self._alert_origin: Dict[str, str] = {}  # alert_id -> from_peer that first surfaced it
         self._lock = threading.Lock()
         self._running = False
+        self.on_result = on_result  # callback(result_dict) for Decision/Explanation to consume
         # Mutable on purpose: PartitionManager (Step 4) shortens this when
         # this device loses contact with all peers, so it doesn't sit
         # around waiting for votes that can no longer arrive.
@@ -100,6 +102,7 @@ class ConflictResolver:
         confidence, agrees = self._evaluate_locally(alert)
         with self._lock:
             self._votes.setdefault(alert.alert_id, {})[self.device_id] = (confidence, agrees)
+            self._alert_origin.setdefault(alert.alert_id, from_peer)
         self._broadcast_vote(alert.alert_id, confidence, agrees)
 
         # Only the device that first sees an alert needs to schedule the
@@ -163,6 +166,11 @@ class ConflictResolver:
 
         label, score, participants = compute_tally(votes)
         peers_known = len(self.discovery.get_active_peers())
+        origin = self._alert_origin.pop(alert.alert_id, self.device_id)
+        peer_voter_ids = [d for d in votes if d != self.device_id]
+        final_confirmed = label == "CONFIRMED"
+        local_conf, local_agrees = votes.get(self.device_id, (0.0, False))
+        overridden = local_agrees != final_confirmed
 
         if participants <= 1 and peers_known > 0:
             print(f"[{self.device_id}] Tally for {alert.alert_id}: only got my own vote "
@@ -171,6 +179,24 @@ class ConflictResolver:
         else:
             print(f"[{self.device_id}] Tally for {alert.alert_id}: {label} "
                   f"(score={score:.2f}, {participants} vote(s) counted).")
+
+        if self.on_result:
+            # peer_triggered: this device first learned of the alert from a peer,
+            #   not locally — the case a human will most want explained.
+            # overridden: the aggregate result disagreed with THIS device's own
+            #   local vote — explanation should describe the aggregate below,
+            #   not this device's own (overridden) reasoning.
+            self.on_result({
+                "alert_id": alert.alert_id,
+                "label": label,
+                "score": score,
+                "peer_triggered": origin != self.device_id,
+                "origin_peer": origin,
+                "peer_voter_ids": peer_voter_ids,
+                "local_confidence": local_conf,
+                "local_agrees": local_agrees,
+                "overridden": overridden,
+            })
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ Run standalone to test against fake_data_generator-style input.
 import uuid
 from datetime import datetime, timezone
 from contracts import Alert, AlertType
+from alert_emitter import emit_alert
 
 # Simple thresholds — tune these once you have real/fake traffic to look at.
 CONN_PER_MIN_SPIKE_THRESHOLD = 300.0
@@ -42,7 +43,7 @@ def smart_plug_to_alert(raw: dict) -> Alert | None:
     if alert_type is None:
         return None  # nothing worth raising
 
-    return Alert(
+    alert = Alert(
         alert_id=str(uuid.uuid4()),
         source_device_id=raw.get("device_id", "unknown-plug"),
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
@@ -54,6 +55,8 @@ def smart_plug_to_alert(raw: dict) -> Alert | None:
         },
         severity_hint=round(severity, 2),
     )
+    emit_alert(alert)
+    return alert
 
 
 if __name__ == "__main__":

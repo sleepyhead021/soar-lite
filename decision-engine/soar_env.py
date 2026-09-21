@@ -12,6 +12,9 @@ Install: pip install stable-baselines3 gymnasium
 """
 
 import uuid
+import json
+import os
+import time
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -28,13 +31,15 @@ from shared.contracts import Alert, AlertType, ActionType, Decision
 # already defined in AlertType (traffic_spike, sensor_anomaly, etc.)
 # ---------------------------------------------------------------------------
 FEATURE_KEYS = [
-    "connections_per_min",
-    "power_draw_watts",
-    "power_draw_anomaly_score",
+    "connections_per_min", "power_draw_watts", "power_draw_anomaly_score",  # plug
+    "motion_events_per_min", "stream_integrity_score",                      # camera
+    "temp_delta_c", "commanded_vs_actual_mismatch",                        # thermostat
+    "failed_attempts_last_min", "unrecognized_credential",                 # lock
 ]
-# NOTE: smart-plug-only schema. Other device adapters (camera, thermostat,
-# lock) will likely add their own keys — confirm with Member 3 whether
-# FEATURE_KEYS should be unified or per-device-type before relying on this.
+# Union across all 4 device types (plug/camera/thermostat/lock). Missing
+# keys default to 0.0 per-device (see _alert_to_state). Simple but wastes
+# capacity — most features are 0 for any given alert. Fine for now; revisit
+# with a device_type field in state if accuracy suffers.
 
 ALERT_TYPES = list(AlertType)          # fixed order for one-hot encoding
 ACTIONS = list(ActionType)             # fixed order: index <-> ActionType
@@ -60,7 +65,7 @@ class SoarEnv(gym.Env):
 
     metadata = {"render_modes": []}
 
-    def __init__(self):
+    def __init__(self, live=False, live_alerts_path="shared/live_alerts.jsonl"):
         super().__init__()
 
         # State = severity_hint (1) + alert_type one-hot (len(ALERT_TYPES))
@@ -71,13 +76,16 @@ class SoarEnv(gym.Env):
         )
         self.action_space = spaces.Discrete(len(ACTIONS))
 
+        self.live = live                        # True = pull real Alerts
+        self._live_path = live_alerts_path       # shared/live_alerts.jsonl
+        self._live_pos = 0                       # byte offset already consumed
         self._current_alert = None
         self._true_severity = None  # ground truth, used only for reward
 
     # -------------------------------------------------------------------
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self._current_alert = self._fake_alert_stub()
+        self._current_alert = self._next_live_alert() if self.live else self._fake_alert_stub()
         self._true_severity = self._current_alert.severity_hint
         state = self._alert_to_state(self._current_alert)
         return state, {"alert": self._current_alert}
@@ -162,6 +170,39 @@ class SoarEnv(gym.Env):
             ESCALATION_ORDER.index(chosen_action) - ESCALATION_ORDER.index(ideal)
         )
         return -0.5 * distance
+
+    # -------------------------------------------------------------------
+    def _next_live_alert(self, poll_interval=0.5):
+        """
+        Blocks until a new line appears in live_alerts.jsonl, parses it
+        into an Alert. Tracks byte offset (self._live_pos) so it only
+        reads NEW lines appended since last call, not from the start.
+        """
+        while True:
+            if os.path.exists(self._live_path):
+                with open(self._live_path, "r") as f:
+                    f.seek(self._live_pos)
+                    line = f.readline()
+                    if line and line.endswith("\n"):
+                        self._live_pos = f.tell()
+                        return self._json_to_alert(line)
+            time.sleep(poll_interval)
+
+    def _json_to_alert(self, line: str) -> Alert:
+        """
+        Assumes adapters serialize Alert with the same field names as
+        contracts.py. If alert_emitter.py uses different key names,
+        this mapping needs updating to match.
+        """
+        d = json.loads(line)
+        return Alert(
+            alert_id=d["alert_id"],
+            source_device_id=d["source_device_id"],
+            timestamp=d["timestamp"],
+            alert_type=AlertType(d["alert_type"]),
+            raw_features=d["raw_features"],
+            severity_hint=float(d["severity_hint"]),
+        )
 
     # -------------------------------------------------------------------
     def _fake_alert_stub(self):
