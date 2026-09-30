@@ -31,10 +31,11 @@ from shared.contracts import Alert, AlertType, ActionType, Decision
 # already defined in AlertType (traffic_spike, sensor_anomaly, etc.)
 # ---------------------------------------------------------------------------
 FEATURE_KEYS = [
-    "connections_per_min", "power_draw_watts", "power_draw_anomaly_score",  # plug
-    "motion_events_per_min", "stream_integrity_score",                      # camera
-    "temp_delta_c", "commanded_vs_actual_mismatch",                        # thermostat
-    "failed_attempts_last_min", "unrecognized_credential",                 # lock
+    "plug_connections_per_min", "plug_power_draw_watts", "plug_power_draw_anomaly_score",
+    "cam_motion_events_per_min", "cam_stream_tamper_score",
+    "therm_temp_delta_c", "therm_command_mismatch",
+    "lock_failed_attempts_last_min", "lock_unrecognized_credential",
+    "hub_peers_gone_silent", "hub_unknown_join_attempts",
 ]
 # Union across all 4 device types (plug/camera/thermostat/lock). Missing
 # keys default to 0.0 per-device (see _alert_to_state). Simple but wastes
