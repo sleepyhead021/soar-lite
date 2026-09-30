@@ -38,8 +38,8 @@ def camera_to_alert(raw: dict) -> Alert | None:
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
         alert_type=alert_type,
         raw_features={
-            "motion_events_per_min": motion_rate,
-            "stream_integrity_score": integrity,
+            "cam_motion_events_per_min": motion_rate,
+            "cam_stream_tamper_score": 1.0 - integrity,   # 0 = clean
         },
         severity_hint=round(severity, 2),
     )
