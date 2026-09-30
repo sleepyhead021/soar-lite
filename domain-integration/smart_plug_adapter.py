@@ -49,9 +49,9 @@ def smart_plug_to_alert(raw: dict) -> Alert | None:
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
         alert_type=alert_type,
         raw_features={
-            "connections_per_min": conn_rate,
-            "power_draw_watts": raw.get("power_draw_watts", 0.0),
-            "power_draw_anomaly_score": power_anomaly,
+            "plug_connections_per_min": conn_rate,
+            "plug_power_draw_watts": raw.get("power_draw_watts", 0.0),
+            "plug_power_draw_anomaly_score": power_anomaly,
         },
         severity_hint=round(severity, 2),
     )
