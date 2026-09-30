@@ -40,8 +40,8 @@ def hub_to_alert(raw: dict) -> Alert | None:
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
         alert_type=alert_type,
         raw_features={
-            "peers_gone_silent": peers_silent,
-            "unknown_join_attempts": unknown_joins,
+            "hub_peers_gone_silent": float(peers_silent),
+            "hub_unknown_join_attempts": float(unknown_joins),
         },
         severity_hint=round(severity, 2),
     )
