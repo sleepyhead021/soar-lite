@@ -29,7 +29,7 @@ testbed/                  Shared — attack simulation scripts and configs (Stag
 3. Each pillar folder has its own `README.md` with your first concrete steps,
    taken directly from Stage B of the implementation plan.
 
-## Getting started day one
+## Getting started
 
 ```bash
 cd shared
