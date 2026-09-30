@@ -38,8 +38,8 @@ def lock_to_alert(raw: dict) -> Alert | None:
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
         alert_type=alert_type,
         raw_features={
-            "failed_attempts_last_min": failed,
-            "unrecognized_credential": unrecognized,
+            "lock_failed_attempts_last_min": float(failed),
+            "lock_unrecognized_credential": float(unrecognized),
         },
         severity_hint=round(severity, 2),
     )
