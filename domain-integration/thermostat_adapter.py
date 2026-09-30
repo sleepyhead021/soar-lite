@@ -38,8 +38,8 @@ def thermostat_to_alert(raw: dict) -> Alert | None:
         timestamp=raw.get("timestamp", datetime.now(timezone.utc).isoformat()),
         alert_type=alert_type,
         raw_features={
-            "temp_delta_c": temp_delta,
-            "commanded_vs_actual_mismatch": mismatch,
+            "therm_temp_delta_c": temp_delta,
+            "therm_command_mismatch": float(mismatch),
         },
         severity_hint=round(severity, 2),
     )
