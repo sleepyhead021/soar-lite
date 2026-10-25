@@ -35,16 +35,32 @@ def load_decisions(csv_path):
 
 
 def load_attack_windows(jsonl_path):
-    events = [json.loads(l) for l in open(jsonl_path)]
-    windows = {}
+    """Pair attack_start/attack_end per scenario, in time order.
+    Returns [(scenario, start_dt, end_dt)]. Unmatched starts get a zero-length
+    window and a warning, so a crashed run is visible rather than silently dropped."""
+    with open(jsonl_path) as f:
+        events = sorted((json.loads(l) for l in f if l.strip()), key=lambda e: e["ts"])
+
+    open_starts = {}   # scenario -> list of start timestamps (FIFO)
+    windows = []
+    to_dt = lambda t: datetime.fromtimestamp(t, tz=timezone.utc)
+
     for e in events:
-        key = (e["scenario"], e.get("target", e.get("iface", e.get("device", ""))))
-        windows.setdefault(key, {})[e["event"]] = e["ts"]
-    return [
-        (k[0], datetime.fromtimestamp(v["attack_start"], tz=timezone.utc),
-         datetime.fromtimestamp(v.get("attack_end", v["attack_start"]), tz=timezone.utc))
-        for k, v in windows.items() if "attack_start" in v
-    ]
+        sc = e["scenario"]
+        if e["event"] == "attack_start":
+            open_starts.setdefault(sc, []).append(e["ts"])
+        elif e["event"] == "attack_end":
+            if open_starts.get(sc):
+                windows.append((sc, to_dt(open_starts[sc].pop(0)), to_dt(e["ts"])))
+            else:
+                print(f"WARN: {sc} attack_end with no matching start, ignored")
+
+    for sc, starts in open_starts.items():
+        for t in starts:
+            print(f"WARN: {sc} attack_start at {t} has no end; zero-length window")
+            windows.append((sc, to_dt(t), to_dt(t)))
+
+    return sorted(windows, key=lambda w: w[1])
 
 
 def summary_stats(decisions):
