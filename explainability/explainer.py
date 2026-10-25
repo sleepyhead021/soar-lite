@@ -208,8 +208,8 @@ def decide_and_explain(
 
     # Pillar 4 override: the action taken was the peer aggregate, not the local
     # argmax. Explain the action that was ACTUALLY taken, and say so.
-    if consensus and consensus.get("overridden") and consensus.get("label") in action_names:
-        chosen = list(action_names).index(consensus["label"])
+    if consensus and consensus.get("overridden") and consensus.get("action") in action_names:
+      chosen = list(action_names).index(consensus["action"])
 
     ablation_scores = []
     for i in range(len(values)):
