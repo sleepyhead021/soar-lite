@@ -16,7 +16,6 @@ import csv, json, os, random, sys, time, uuid
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-import testbed.metrics                                                      # noqa: E402
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 for sub in ("explainability", "p2p_coordination", "testbed"):
@@ -29,13 +28,9 @@ from p2p_coordination.conflict_resolution import compute_tally                  
 from decision_engine.soar_env import SoarEnv, ACTIONS               # noqa: E402
 from decision_engine.inference import score_fn, FEATURE_NAMES       # noqa: E402
 from explainability.explainer import decide_and_explain, softmax_confidence
+from action_unit import execute
+from testbed import metrics
 
-decision, explanation, trace = decide_and_explain(
-    score_fn, FEATURE_NAMES, obs.tolist(),
-    [a.value for a in ACTIONS], [alert.alert_id],
-    decision_id=str(uuid.uuid4()),
-)
-# decision["confidence_score"] and decision["contributing_factors"] are now real
 
 OUT = os.path.join(ROOT, "out")
 ACTION_NAMES = [a.value for a in ACTIONS]
@@ -51,16 +46,6 @@ CSV_COLS = ["alert_id", "source_device_id", "alert_timestamp", "alert_type",
 def peer_vote(sev):
     conf = max(0.0, min(1.0, sev + random.uniform(-0.15, 0.15)))
     return conf, conf > 0.5
-
-
-def execute(decision):
-    """Action Automation stub: records an ActionResult (no real enforcement)."""
-    act = decision["chosen_action"]
-    exp = None
-    if act == "rate_limit":
-        exp = (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat()
-    return ActionResult(decision["decision_id"], ActionType(act), True, exp,
-                        notes="simulated")
 
 
 def main(n=200, seed=0):

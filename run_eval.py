@@ -3,7 +3,7 @@
 import csv, os, sys
 import numpy as np
 from stable_baselines3 import PPO
-from contracts import AlertType
+from shared.contracts import AlertType
 from decision_engine.soar_env import SoarEnv, rule_based_action
 
 TYPE_AWARE = (AlertType.DATA_TAMPERING, AlertType.FALSE_DATA_INJECTION)
