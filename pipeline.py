@@ -16,18 +16,18 @@ import csv, json, os, random, sys, time, uuid
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
+import testbed.metrics                                                      # noqa: E402
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 for sub in ("explainability", "p2p_coordination", "testbed"):
     sys.path.insert(0, os.path.join(ROOT, sub))
 
-from contracts import ActionResult, ActionType                      # noqa: E402
-from behavioral_shadow import BehavioralShadow                      # noqa: E402
-from consensus import apply_consensus                               # noqa: E402        # noqa: E402
-from conflict_resolution import compute_tally                       # noqa: E402
+from shared.contracts import ActionResult, ActionType                      # noqa: E402
+from shared.behavioral_shadow import BehavioralShadow                      # noqa: E402
+from shared.consensus import apply_consensus                               # noqa: E402        # noqa: E402
+from p2p_coordination.conflict_resolution import compute_tally                       # noqa: E402
 from decision_engine.soar_env import SoarEnv, ACTIONS               # noqa: E402
 from decision_engine.inference import score_fn, FEATURE_NAMES       # noqa: E402
-import metrics                                                      # noqa: E402
 from explainability.explainer import decide_and_explain, softmax_confidence
 
 decision, explanation, trace = decide_and_explain(

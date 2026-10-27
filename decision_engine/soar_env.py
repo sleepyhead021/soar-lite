@@ -207,24 +207,24 @@ class SoarEnv(gym.Env):
 
     # -------------------------------------------------------------------
     def _fake_alert_stub(self):
-    rng = np.random.default_rng()
-    alert_type = ALERT_TYPES[rng.integers(0, len(ALERT_TYPES))]
-    sev = float(rng.uniform())                      # TRUE severity
-    raw = {k: 0.0 for k in FEATURE_KEYS}
-    # Signal features correlate with true severity (+ small noise)
-    sig = lambda: float(np.clip(sev + rng.normal(0, 0.08), 0, 1))
-    for k in ("plug_connections_per_min", "plug_power_draw_anomaly_score",
-              "cam_stream_tamper_score", "hub_unknown_join_attempts"):
-        raw[k] = sig()
-    raw["plug_power_draw_watts"] = float(rng.uniform())  # pure noise on purpose
-    return Alert(
-        alert_id=str(uuid.uuid4()),
-        source_device_id=f"device_{rng.integers(0, 20)}",
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        alert_type=alert_type,
-        raw_features=raw,
-        severity_hint=sev,
-    )
+        rng = np.random.default_rng()
+        alert_type = ALERT_TYPES[rng.integers(0, len(ALERT_TYPES))]
+        sev = float(rng.uniform())                      # TRUE severity
+        raw = {k: 0.0 for k in FEATURE_KEYS}
+        # Signal features correlate with true severity (+ small noise)
+        sig = lambda: float(np.clip(sev + rng.normal(0, 0.08), 0, 1))
+        for k in ("plug_connections_per_min", "plug_power_draw_anomaly_score",
+                  "cam_stream_tamper_score", "hub_unknown_join_attempts"):
+            raw[k] = sig()
+        raw["plug_power_draw_watts"] = float(rng.uniform())  # pure noise on purpose
+        return Alert(
+            alert_id=str(uuid.uuid4()),
+            source_device_id=f"device_{rng.integers(0, 20)}",
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            alert_type=alert_type,
+            raw_features=raw,
+            severity_hint=sev,
+        )
 
 
 def rule_based_action(obs: np.ndarray) -> int:
