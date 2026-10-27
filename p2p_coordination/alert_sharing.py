@@ -26,9 +26,9 @@ import uuid
 from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
-from contracts import Alert, AlertType, SyncMessage, SyncMessageType  # noqa: E402
-from serialization import to_json, sync_message_from_dict, alert_from_dict  # noqa: E402
-from sync_logger import log_sync  # noqa: E402
+from shared.contracts import Alert, AlertType, SyncMessage, SyncMessageType  # noqa: E402
+from shared.serialization import to_json, sync_message_from_dict, alert_from_dict  # noqa: E402
+from shared.sync_logger import log_sync  # noqa: E402
 
 from peer_discovery import PeerDiscovery  # noqa: E402
 

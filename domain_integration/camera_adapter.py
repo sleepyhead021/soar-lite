@@ -1,8 +1,8 @@
 """Camera Adapter — converts raw camera telemetry into shared Alert."""
 import uuid
 from datetime import datetime, timezone
-from contracts import Alert, AlertType
-from alert_emitter import emit_alert
+from shared.contracts import Alert, AlertType
+from shared.alert_emitter import emit_alert
 
 MOTION_RATE_SPIKE_THRESHOLD = 10.0       # events/min, unusually frequent
 STREAM_INTEGRITY_THRESHOLD = 0.7         # 0-1, how corrupted/tampered feed looks

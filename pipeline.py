@@ -23,12 +23,19 @@ for sub in ("explainability", "p2p_coordination", "testbed"):
 
 from contracts import ActionResult, ActionType                      # noqa: E402
 from behavioral_shadow import BehavioralShadow                      # noqa: E402
-from consensus import apply_consensus                               # noqa: E402
-from explainer import decide_and_explain, softmax_confidence        # noqa: E402
+from consensus import apply_consensus                               # noqa: E402        # noqa: E402
 from conflict_resolution import compute_tally                       # noqa: E402
 from decision_engine.soar_env import SoarEnv, ACTIONS               # noqa: E402
 from decision_engine.inference import score_fn, FEATURE_NAMES       # noqa: E402
 import metrics                                                      # noqa: E402
+from explainability.explainer import decide_and_explain, softmax_confidence
+
+decision, explanation, trace = decide_and_explain(
+    score_fn, FEATURE_NAMES, obs.tolist(),
+    [a.value for a in ACTIONS], [alert.alert_id],
+    decision_id=str(uuid.uuid4()),
+)
+# decision["confidence_score"] and decision["contributing_factors"] are now real
 
 OUT = os.path.join(ROOT, "out")
 ACTION_NAMES = [a.value for a in ACTIONS]

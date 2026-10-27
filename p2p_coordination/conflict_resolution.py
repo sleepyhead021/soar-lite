@@ -40,12 +40,12 @@ from datetime import datetime
 from typing import Dict, Tuple
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
-from contracts import Alert, SyncMessage, SyncMessageType  # noqa: E402
-from serialization import to_json, sync_message_from_dict  # noqa: E402
-from sync_logger import log_sync  # noqa: E402
+from shared.contracts import Alert, SyncMessage, SyncMessageType  # noqa: E402
+from shared.serialization import to_json, sync_message_from_dict  # noqa: E402
+from shared.sync_logger import log_sync  # noqa: E402
 
-from peer_discovery import PeerDiscovery  # noqa: E402
-from alert_sharing import AlertSharer, _make_demo_alert  # noqa: E402
+from p2p_coordination.peer_discovery import PeerDiscovery  # noqa: E402
+from p2p_coordination.alert_sharing import AlertSharer, _make_demo_alert  # noqa: E402
 
 
 VOTE_PORT = 50002

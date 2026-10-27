@@ -25,8 +25,8 @@ from typing import Dict
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
-from contracts import SyncMessage, SyncMessageType  # noqa: E402
-from sync_logger import log_sync  # noqa: E402
+from shared.contracts import SyncMessage, SyncMessageType  # noqa: E402
+from shared.sync_logger import log_sync  # noqa: E402
 
 
 BROADCAST_PORT = 50000

@@ -3,8 +3,8 @@ Hub sees aggregate/network-level signals other devices don't: peer counts,
 sync gaps, and unknown device join attempts."""
 import uuid
 from datetime import datetime, timezone
-from contracts import Alert, AlertType
-from alert_emitter import emit_alert
+from shared.contracts import Alert, AlertType
+from shared.alert_emitter import emit_alert
 
 PEER_DROP_THRESHOLD = 1          # any expected peer going silent
 UNKNOWN_JOIN_THRESHOLD = 1       # any unrecognized device attempting to join

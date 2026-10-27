@@ -1,8 +1,8 @@
 """Smart Lock Adapter — converts raw lock telemetry into shared Alert."""
 import uuid
 from datetime import datetime, timezone
-from contracts import Alert, AlertType
-from alert_emitter import emit_alert
+from shared.contracts import Alert, AlertType
+from shared.alert_emitter import emit_alert
 
 FAILED_ATTEMPTS_THRESHOLD = 3      # failed unlock attempts in short window
 UNRECOGNIZED_CREDENTIAL = 1        # 1 = credential not in known list

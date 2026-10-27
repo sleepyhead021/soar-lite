@@ -37,7 +37,7 @@ import math
 from datetime import datetime, timezone
 from typing import Sequence
 
-from decision_trace import DecisionTrace, ScoreFn, neutral_baseline
+from explainability.decision_trace import DecisionTrace, ScoreFn, neutral_baseline
 
 def _iso(ts: float) -> str:
     return datetime.fromtimestamp(ts, timezone.utc).isoformat()

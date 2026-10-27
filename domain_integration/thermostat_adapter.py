@@ -1,8 +1,8 @@
 """Thermostat Adapter — converts raw thermostat telemetry into shared Alert."""
 import uuid
 from datetime import datetime, timezone
-from contracts import Alert, AlertType
-from alert_emitter import emit_alert
+from shared.contracts import Alert, AlertType
+from shared.alert_emitter import emit_alert
 
 TEMP_JUMP_THRESHOLD_C = 8.0     # degrees change between consecutive readings
 COMMAND_MISMATCH_THRESHOLD = 1  # any mismatch counts as suspicious

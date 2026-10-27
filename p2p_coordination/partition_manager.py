@@ -27,9 +27,9 @@ import uuid
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared"))
 
-from peer_discovery import PeerDiscovery  # noqa: E402
-from conflict_resolution import ConflictResolver  # noqa: E402
-from alert_sharing import AlertSharer, _make_demo_alert  # noqa: E402
+from p2p_coordination.peer_discovery import PeerDiscovery  # noqa: E402
+from p2p_coordination.conflict_resolution import ConflictResolver  # noqa: E402
+from p2p_coordination.alert_sharing import AlertSharer, _make_demo_alert  # noqa: E402
 
 
 CHECK_INTERVAL_SECONDS = 1

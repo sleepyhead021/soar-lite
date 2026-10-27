@@ -1,0 +1,2 @@
+{"DDOS_01": {"alert_type": "traffic_spike", "features": {"plug_connections_per_min": 0.9}},
+ "TAMPER_01": {"alert_type": "data_tampering", "features": {"therm_command_mismatch": 1.0}}}

@@ -7,8 +7,8 @@ Run standalone to test against fake_data_generator-style input.
 
 import uuid
 from datetime import datetime, timezone
-from contracts import Alert, AlertType
-from alert_emitter import emit_alert
+from shared.contracts import Alert, AlertType
+from shared.alert_emitter import emit_alert
 
 # Simple thresholds — tune these once you have real/fake traffic to look at.
 CONN_PER_MIN_SPIKE_THRESHOLD = 300.0

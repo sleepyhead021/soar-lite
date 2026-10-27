@@ -15,7 +15,7 @@ import json
 from dataclasses import asdict
 from enum import Enum
 
-from contracts import (
+from shared.contracts import (
     Alert, AlertType,
     Decision, ActionType,
     Explanation,
