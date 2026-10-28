@@ -30,7 +30,7 @@ from decision_engine.inference import score_fn, FEATURE_NAMES       # noqa: E402
 from explainability.explainer import decide_and_explain, softmax_confidence
 from action_unit import execute
 from testbed import metrics
-
+from knowledge_base import match_pattern   # already present
 
 OUT = os.path.join(ROOT, "out")
 ACTION_NAMES = [a.value for a in ACTIONS]
@@ -47,12 +47,21 @@ def peer_vote(sev):
     conf = max(0.0, min(1.0, sev + random.uniform(-0.15, 0.15)))
     return conf, conf > 0.5
 
+def warm_up(env, shadows, n=4000):
+    """Seed each device's shadow with benign readings so baselines are real means."""
+    for _ in range(n):
+        a = env._fake_alert_stub()
+        if a.severity_hint < 0.25:
+            sh = shadows.setdefault(a.source_device_id, BehavioralShadow(a.source_device_id))
+            st = env._alert_to_state(a)
+            sh.observe(dict(zip(FEATURE_NAMES, map(float, st))))
 
 def main(n=200, seed=0):
     random.seed(seed); np.random.seed(seed)
     os.makedirs(OUT, exist_ok=True)
     env = SoarEnv()
     shadows = {}
+    warm_up(env, shadows)
     stats = {"overridden": 0, "results": 0}
     attack_events = []
 
@@ -90,15 +99,18 @@ def main(n=200, seed=0):
             result = apply_consensus(local_action, result)
             stats["results"] += 1; stats["overridden"] += int(result["overridden"])
 
+
             # 3. decide + explain (atomic)
             sh = shadows.setdefault(alert.source_device_id,
                                     BehavioralShadow(alert.source_device_id))
             feats = dict(zip(FEATURE_NAMES, state))
+            pid, psim = match_pattern(alert)
             decision, expl, _ = decide_and_explain(
                 score_fn, FEATURE_NAMES, state, ACTION_NAMES, [alert.alert_id],
                 decision_id=str(uuid.uuid4()),
                 baseline=sh.baseline(FEATURE_NAMES),
                 shadow_deviation=sh.z_scores(feats),
+                matched_pattern_id=pid, matched_pattern_similarity=psim,
                 consensus=result, policy_version="ppo_soar_agent")
 
             # 4. execute, learn "normal" only from benign outcomes
@@ -110,7 +122,7 @@ def main(n=200, seed=0):
             w.writerow([alert.alert_id, alert.source_device_id, alert.timestamp,
                         alert.alert_type.value, alert.severity_hint, alert.raw_features,
                         decision["decision_id"], decision["chosen_action"],
-                        decision["confidence_score"], decision["timestamp"], ""])
+                        decision["confidence_score"], decision["timestamp"], env._compute_reward(alert, ActionType(decision["chosen_action"]), alert.severity_hint)])
             fexp.write(json.dumps(expl) + "\n")
             time.sleep(SPACING)
 

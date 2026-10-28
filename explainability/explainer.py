@@ -17,7 +17,7 @@ Attribution method: leave-one-out ablation on the action-score margin.
 Why this and not SHAP/LIME:
   * it is computed from the live policy network during the decision, not from a
     surrogate model fitted afterwards;
-  * it costs one extra forward pass per feature (≈10 for our state space), which
+  * it costs one extra forward pass per feature (19 for our state space (1 severity + 7 alert types + 11 device features)), which
     an edge device can afford, where sampling-based SHAP cannot;
   * the sign is meaningful — positive means the feature pushed the agent
     *towards* the action it took;

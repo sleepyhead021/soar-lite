@@ -30,7 +30,7 @@ from shared.contracts import Alert, AlertType, SyncMessage, SyncMessageType  # n
 from shared.serialization import to_json, sync_message_from_dict, alert_from_dict  # noqa: E402
 from shared.sync_logger import log_sync  # noqa: E402
 
-from peer_discovery import PeerDiscovery  # noqa: E402
+from p2p_coordination.peer_discovery import PeerDiscovery  # noqa: E402
 
 
 ALERT_PORT = 50001

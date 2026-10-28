@@ -3,7 +3,7 @@ import random
 import uuid
 from datetime import datetime, timezone
 
-from contracts import Alert, AlertType
+from shared.contracts import Alert, AlertType
 
 
 def _now() -> str:
